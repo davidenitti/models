@@ -17,18 +17,19 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf
 import time
 
-import mnist
+import tensorflow as tf  # pylint: disable=g-bad-import-order
+
+from official.mnist import mnist
 
 BATCH_SIZE = 100
 
 
 def dummy_input_fn():
   image = tf.random_uniform([BATCH_SIZE, 784])
-  labels = tf.random_uniform([BATCH_SIZE], maxval=9, dtype=tf.int32)
-  return image, tf.one_hot(labels, 10)
+  labels = tf.random_uniform([BATCH_SIZE, 1], maxval=9, dtype=tf.int32)
+  return image, labels
 
 
 def make_estimator():
@@ -42,6 +43,7 @@ def make_estimator():
 
 
 class Tests(tf.test.TestCase):
+  """Run tests for MNIST model."""
 
   def test_mnist(self):
     classifier = make_estimator()
@@ -57,7 +59,7 @@ class Tests(tf.test.TestCase):
 
     input_fn = lambda: tf.random_uniform([3, 784])
     predictions_generator = classifier.predict(input_fn)
-    for i in range(3):
+    for _ in range(3):
       predictions = next(predictions_generator)
       self.assertEqual(predictions['probabilities'].shape, (10,))
       self.assertEqual(predictions['classes'].shape, ())
@@ -103,6 +105,7 @@ class Tests(tf.test.TestCase):
 
 
 class Benchmarks(tf.test.Benchmark):
+  """Simple speed benchmarking for MNIST."""
 
   def benchmark_train_step_time(self):
     classifier = make_estimator()
